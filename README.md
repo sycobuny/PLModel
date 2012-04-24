@@ -49,3 +49,18 @@ License
 -------
 
 MIT Licensed. See LICENSE for details.
+
+Documentation
+-------------
+
+> "You're not using POD? Heretic!"
+
+I don't really care for POD. Without a POD preprocessor, it's almost impossible
+to read, and it's a massive pain to write. I think markdown suffices to both be
+easy to read and write, and has the added bonus of being a Perl Original
+Technology™. There's no reason we can't use a different, more sane, perl library
+to generate perl documentation. While I don't want this project to be an essay
+on the merits of documentation styles, I imagine the topic might come up.
+
+[pgmodel]: https://github.com/sycobuny/pg_model "PGModel - PostgreSQL for PHP"
+[sequel]: https://sequel.rubyforge.org/ "Sequel - The database toolkit for Ruby"
