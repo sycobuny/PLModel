@@ -352,4 +352,14 @@ odd case that it gets to the end of the function and can't simply subtract an
 given word does not singularize correctly for this or any other reason, feel
 free to [submit a patch][plmodel].
 
+License
+-------
+
+MIT Licensed. See the LICENSE file in the PLModel directory for the full license.
+
+Authors
+-------
+
+* Stephen Belcher <sbelcher@gmail.com>
+
 [plmodel]: https://github.com/sycobuny/pl_model "PLModel: Simple Perl DB Access"
