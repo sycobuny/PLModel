@@ -77,7 +77,7 @@ package PLModel::Inflector {
         ['fe', 'ves', [qw(kni li wi)]],
         ['o', 'oes',  [qw(ech embarg her potat tomat torped vet)]],
         ['a', 'ae',   [qw(alg larv nebul vertebr)]],
-        ['us', 'i',   [qw(alum bacill foc nucle radi stimul termin)]],
+        ['us', 'i',   [qw(alumn bacill foc nucle radi stimul termin)]],
         ['um', 'a',   [qw(addend bacteri dat errat medi ov strat)]],
         ['is', 'es',  [qw(
             analys ax bas cris diagnos emphas hypothes neuros oas parenthes
@@ -180,10 +180,10 @@ package PLModel::Inflector {
         foreach my $suf (@suffixes) {
             $sing = $suf->[0];
             if ($string =~ /(^|.*_)([^_]+)$sing$/) {
-                my ($out) = $_suf->($string, $1, $2, $suf, 1);
+                my ($out) = $_suf->($string, $2, $suf, 1);
                 return $out if $out;
 
-                break; # won't wind up matching any of the others anyway.
+                last; # won't wind up matching any of the others anyway.
             }
         }
 
@@ -233,10 +233,11 @@ package PLModel::Inflector {
         foreach my $suf (@suffixes) {
             $plur = $suf->[1];
             if ($string =~ /(^|.*_)([^_]+)$plur$/) {
-                my ($out) = $suf->($string, $1, $2, $suf, 0);
+                my ($out) = $_suf->($string, $2, $suf, 0);
                 return $out if $out;
 
-                break; # won't wind up matching any of the others anyway.
+                # we won't skip the rest of the loop as pluralize() does as
+                # there *are* ambiguous situations in this one.
             }
         }
 
