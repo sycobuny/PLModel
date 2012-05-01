@@ -82,6 +82,7 @@ foreach my $t (@test_plur) {
     is PLModel::Inflector::pluralize($s), $p, $nm;
 }
 
+# test the singularize() method
 {
     local ($a, $b);
     $maxlen = length((sort {

@@ -72,6 +72,9 @@ package PLModel::Inflector {
         }
     }
 
+    # these are irregular endings and the various word stems they're tied to.
+    # they're much like the irregular suffixes earlier, but they follow their
+    # own internal logic.
     @suffixes = (
         ['f', 'ves',  [qw(cal el hal hoo lea loa scar sel shea shel thie wol)]],
         ['fe', 'ves', [qw(kni li wi)]],
@@ -89,15 +92,23 @@ package PLModel::Inflector {
         my ($string) = @_;
         return $camelized{$string} if $camelized{$string};
 
+        # we're good stewards of our global variables :)
         local ($_, $1, $2);
+
+        # split on '_' and upper case the first letter of each element
         my ($out);
         $out = join('', map { s/^(.)(.*)$/uc($1).$2/oer } split(/_/, $string));
 
+        # this means someone decamelized something that conflicts with what we
+        # just got back. this probably means they're going to wind up with
+        # namespace conflicts, so make a big racket about it.
         if ($decamelized{$out}) {
             die "Already have cached (de)camelized $string($out) as " .
                 "$decamelized{$out}!";
         }
 
+        # cache the results so we can quickly look them up later (also so we
+        # can raise errors in decamelize()).
         $camelized{$string} = $out;
         $decamelized{$out}  = $string;
 
@@ -109,52 +120,77 @@ package PLModel::Inflector {
         return $decamelized{$string} if $decamelized{$string};
 
         my ($up, $out, $char, @chars) = (1, '', '', split(//, $string));
+
+        # do this as an old-school for loop cause the position we're at matters
         for (my ($x) = 0; $x <= $#chars; $x++) {
             $char = $chars[$x];
 
+            # first character - always lowercase this
             if (!$out) {
                 $out = lc($char);
             }
+
+            # we're on a lowercase letter. just add it, and make sure we know
+            # that we aren't dealing with a word boundary
             elsif ($char =~ /[a-z]/) {
                 $out .= $char;
                 $up   = 0;
             }
+
+            # we're on an uppercase letter
             elsif ($char =~ /[A-Z]/) {
+                # if the last letter was lowercase and/or we're a) not at the
+                # end of the string and b) the next letter isn't uppercase, then
+                # add an underscore before continuing.
                 if ((!$up) || (($#chars >= $x) && ($chars[$x+1] =~ /[a-z]/))) {
                     $out .= '_';
                 }
 
+                # downcase the char, add it, and mark we just did it.
                 $out .= lc($char);
                 $up   = 1;
             }
+
+            # this probably shouldn't happen, but if we hit a whitespace,
+            # replace it with an underscore.
             elsif ($char =~ /\s/) {
                 $out .= '_';
             }
         }
 
+        # this means someone camelized something that conflicts with what we
+        # just got back. this probably means they're going to wind up with
+        # namespace conflicts, so make a big racket about it.
         if ($camelized{$out}) {
             die "Already have cached camelized $string($out) as " .
                 "$camelized{$out}!";
         }
 
+        # cache the results so we can quickly look them up later (also so we
+        # can raise errors in camelize()).
         $decamelized{$string} = $out;
         $camelized{$out}      = $string;
 
         return $out;
     }
 
+    # we do very similar things in both pluralize() and singularize() to deal
+    # with the @suffixes list, so it's abstracted here as a private closure
     my ($_suf) = sub {
         local ($1);
         my ($string, $stem, $row, $singular) = @_;
         my ($sing, $plur, $words) = @$row;
 
+        # check each word to see if it matches
         foreach my $word (@$words) {
+            # if the word stem is in this list, do the substitution
             if ($stem =~ /$word$/) {
                 my ($s, $r) = $singular ? ($sing, $plur) : ($plur, $sing);
                 return $string =~ s/(.*$stem)$s$/$1$r/r;
             }
         }
 
+        # explicitly return undef to signify nothing matched.
         return undef;
     };
 
