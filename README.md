@@ -14,15 +14,9 @@ For Example
 ### Account.pm
 use v5.14;
 use warnings;
-use PLModel;
-
-PLModel::Database::add_connection(
-    host => 'localhost',
-    user => 'steve',
-);
 
 package Account {
-    our (@ISA) = qw(PLModel::Base);
+    use base qw(PLModel::Base);
 
     sub debit {
         my ($self) = shift;

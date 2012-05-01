@@ -97,4 +97,4 @@ foreach my $t (@test_sing) {
     is PLModel::Inflector::singularize($p), $s, $nm;
 }
 
-# inflections.t - MIT Licensed by Stephen Belcher. See LICENSE
+# inflections.t - MIT Licensed by Stephen Belcher, 2012. See LICENSE
