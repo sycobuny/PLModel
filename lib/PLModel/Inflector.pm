@@ -300,9 +300,21 @@ package PLModel::Inflector {
         }
 
         # no really, what? this is probably wrong.
-        warn("Could not properly singularize $string, consider adding it as " .
-             "an uncountable value with PLModel::Inflector::add_uncountable()");
+        die("Could not properly singularize $string, consider adding it as " .
+            "an uncountable value with PLModel::Inflector::add_uncountable()");
         return $string;
+    }
+
+    sub add_uncountable {
+        my ($uncountable) = @_;
+        $uncountable{$uncountable} = 1;
+    }
+
+    sub add_irregular {
+        my ($singular, $plural) = @_;
+
+        $irregular{words}{$singular} = $plural;
+        $irregular{Rwords}{$plural}  = $singular;
     }
 }
 
@@ -377,7 +389,9 @@ matters:
 Convert a single word, optionally with multiple prefixed words separated by
 underscores, into a pluralized form. This method tries its best to make sense
 out of the English language, but there's always room for improvement. If a given
-word does not pluralize correctly, feel free to [submit a patch][plmodel].
+word does not pluralize correctly, feel free to [submit a patch][plmodel], or
+(if it is specific to your project, use `add_uncountable()` or
+`add_irregular()`).
 
 ### singularize(string) - returns string
 
@@ -385,9 +399,30 @@ Convert a single word, optionally with multiple prefixed words separated by
 underscores, into a singularized form. This method tries its best to make sense
 out of the English language, but there's always room for improvement. If, in the
 odd case that it gets to the end of the function and can't simply subtract an
-'s' from the string, it *will* issue a warning, but not throw an error. If a
-given word does not singularize correctly for this or any other reason, feel
-free to [submit a patch][plmodel].
+'s' from the string, it will throw an error, which will cause the program to
+exit unless caught. If a given word does not singularize correctly for this or
+any other reason, feel free to [submit a patch][plmodel], or (if it is specific
+to your project, use `add_uncountable()` or `add_irregular()`).
+
+### add_uncountable(string)
+
+Register a word as being uncountable. This function modifies the behavior of
+`singularize()` and `pluralize()`, in case there is an instance where a given
+word, be it a proper name, non-English word, or other, can not be pluralized.
+The function has no valid return value.
+
+### add_irregular(string, string)
+
+* arg 1: the singular form
+* arg 2: the plural form
+
+Register a word as having an irregular pluralization. This function modifies the
+behavior of `singularize()` and `pluralize()`, in case there is an instance
+where a given word, be it a proper name, non-English word, or other, can not be
+normally pluralized. The function has no valid return value. The registered word
+behaves like the existing 'child' => 'children'. That is to say, it must be a
+complete word separated by at least an underscore from anything before it, and
+not a suffix, as 'man' => 'men' ('fireman' => 'firemen').
 
 License
 -------

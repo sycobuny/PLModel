@@ -15,7 +15,7 @@ my ($tests);
 # set up test conditions
 BEGIN {
     # non-iterated tests
-    $tests = 6;
+    $tests = 16;
 
     @test_plur = (
         # [singular, plural, test name]
@@ -127,5 +127,37 @@ is PLModel::Inflector::camelize('test_ab_de_camelize'), 'TestABDeCamelize',
     like $@, qr/^Already have cached .* as TestABDeCamelize!/,
          'demamelize("TestAbDeCamelize")  - throws error with multiple results';
 }
+
+# test the add_uncountable() method
+{
+    local ($@);
+    eval { PLModel::Inflector::singularize('quoiriflorrble') };
+    like $@, qr/^Could not properly singularize/,
+         "add_uncountable() - Non-existent words can't be singularized";
+}
+
+PLModel::Inflector::add_uncountable('quoiriflorrble');
+is PLModel::Inflector::pluralize('quoiriflorrble'), 'quoiriflorrble',
+   'add_uncountable("quoiriflorrble") - Check 1/2';
+is PLModel::Inflector::singularize('quoiriflorrble'), 'quoiriflorrble',
+   'add_uncountable("quoiriflorrble") - Check 2/2';
+
+# test the add_irregular() method
+is PLModel::Inflector::pluralize('sashankanoys'), 'sashankanoyses',
+   'add_irregular() - Non-existent words pluralize as normal';
+is PLModel::Inflector::singularize('sashankanoyses'), 'sashankanoys',
+   'add_irregular() - Non-existnet words singularize as normal';
+
+PLModel::Inflector::add_irregular('sashankanoys', 'qwapalavee');
+is PLModel::Inflector::pluralize('sashankanoys'), 'qwapalavee',
+   'add_irregular("sashankanoys", "qwapalavee") - Check 1/5';
+is PLModel::Inflector::singularize('qwapalavee'), 'sashankanoys',
+   'add_irregular("sashankanoys", "qwapalavee") - Check 2/5';
+is PLModel::Inflector::pluralize('asashankanoys'), 'asashankanoyses',
+   'add_irregular("sashankanoys", "qwapalavee") - Check 3/5';
+is PLModel::Inflector::pluralize('a_sashankanoys'), 'a_qwapalavee',
+   'add_irregular("sashankanoys", "qwapalavee") - Check 4/5';
+is PLModel::Inflector::singularize('a_qwapalavee'), 'a_sashankanoys',
+   'add_irregular("sashankanoys", "qwapalavee") - Check 5/5';
 
 # inflections.t - MIT Licensed by Stephen Belcher, 2012. See LICENSE
