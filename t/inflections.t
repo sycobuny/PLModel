@@ -10,10 +10,13 @@ my (@test_plur);
 my (@test_sing);
 
 # count of tests so we can add a test and it's automatically counted for plans
-my ($tests) = 0;
+my ($tests);
 
 # set up test conditions
 BEGIN {
+    # non-iterated tests
+    $tests = 6;
+
     @test_plur = (
         # [singular, plural, test name]
         ['equipment',   'equipment',    'uncountable'],
@@ -95,6 +98,34 @@ foreach my $t (@test_sing) {
     my ($nm)   = sprintf('singularize("%s")%' . $sp . 's - %s', $p, '', $n);
 
     is PLModel::Inflector::singularize($p), $s, $nm;
+}
+
+# test the camelize() method
+is PLModel::Inflector::camelize('test_camelize'), 'TestCamelize',
+   'camelize("test_camelize") - upper-cases a standard string';
+
+{
+    local ($@);
+    eval { PLModel::Inflector::camelize('Test_camelize') };
+    like $@, qr/^Already have cached .* as test_camelize!/,
+         'camelize("Test_camelize") - throws error with multiple results';
+}
+
+# test the decamelize() method
+is PLModel::Inflector::decamelize('TestDeCamelize'), 'test_de_camelize',
+   'decamelize("TestDeCamelize")    - lower-cases a standard string';
+
+is PLModel::Inflector::decamelize('TestABDeCamelize'), 'test_ab_de_camelize',
+   'decamelize("TestABDeCamelize")  - lower-cases an abbreviated string';
+
+is PLModel::Inflector::camelize('test_ab_de_camelize'), 'TestABDeCamelize',
+   'camelize("test_ab_de_camelize") - caches reverse of abbreviated strings';
+
+{
+    local ($@);
+    eval { PLModel::Inflector::decamelize('TestAbDeCamelize') };
+    like $@, qr/^Already have cached .* as TestABDeCamelize!/,
+         'demamelize("TestAbDeCamelize")  - throws error with multiple results';
 }
 
 # inflections.t - MIT Licensed by Stephen Belcher, 2012. See LICENSE
