@@ -354,7 +354,7 @@ Example
     # => 'SomeTable'
 
 Functions
--------
+---------
 
 ### camelize(string) - returns string
 
