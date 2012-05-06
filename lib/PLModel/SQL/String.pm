@@ -23,19 +23,7 @@ package PLModel::SQL::String {
         }
 
         if (exists($options->{connection}) {
-            $val = $options->{connection};
-            unless ($val) {
-                $val = PLModel::Database::default_connection();
-            }
-
-            if ($adapter{$id}) {
-                unless ($val->adapter() eq $adapter{$id}) {
-                    die "Query is written for $adapter{$id}, but the given " .
-                        "connection for preparing is " . $val->adapter();
-                }
-            }
-
-            $statement{$id} = $val->prepare($$self, $name{$id});
+            $self->prepare($options->{connection});
         }
     };
 
@@ -64,6 +52,10 @@ package PLModel::SQL::String {
         }
 
         if ($adapter{$id}) {
+            unless ($connection) {
+                $connection = PLModel::Database::default_connection();
+            }
+
             unless ($connection->adapter() eq $adapter{$id}) {
                 die "Query is written for $adapter{$id}, but the given " .
                     "connection for preparing is " . $connection->adapter();
@@ -170,7 +162,7 @@ accepted keys are:
 Instance Methods
 ----------------
 
-### prepare(PLModel::Database::Connection, [string]) - returns PLModel::PreparedStatement
+### prepare([PLModel::Database::Connection], [string]) - returns PLModel::PreparedStatement
 
 ### bind_count() - returns integer
 
