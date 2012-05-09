@@ -6,18 +6,54 @@ package PLModel::Database {
 
     my ($connection);
     my ($csub);
+    my (%configuration) = (
+        adapter  => 'postgres',
+    );
 
     $csub = sub {
-        unless ($connection) {
-            $connection = DBI->connect('dbi:Pg:', '', '', {AutoCommit => 0});
+        my ($un) = ($configuration{username} || '');
+        my ($pw) = ($configuration{password} || '');
+        my ($dsn, %dsn);
+
+        if ($configuration{adapter} eq 'postgres') {
+            $dsn = 'dbi:Pg:';
+
+            if ($configuration{hostname} || $configuration{host}) {
+                $dsn{host} = $configuration{hostname} || $configuration{host};
+            }
+            if ($configuration{database} || $configuration{db} ||
+                $configuration{dbname}) {
+                $dsn{db} = $configuration{database} || $configuration{db} ||
+                           $configuration{dbname};
+            }
+            if ($configuration{port}) {
+                $dsn{port} = $configuration{port};
+            }
+
+            $dsn .= join(';', map { $_ . '=' . $dsn{$_} } keys(%dsn));
         }
 
-        unless ($connection->{Active}) {
-            $connection = DBI->connect('dbi:Pg:', '', '', {AutoCommit => 0});
+        unless ($connection && $connection->{Active}) {
+            $connection = DBI->connect($dsn, $un, $pw, {AutoCommit => 0});
         }
 
         return $connection;
     };
+
+    sub configure {
+        my (%options) = (%configuration, @_);
+
+        unless ($options{adapter} eq 'postgres') {
+            die "Currently only the 'postgres' adapter is supported.";
+        }
+
+        %configuration = %options;
+    }
+
+    sub import {
+        my ($package, %options) = @_;
+        configure(%options);
+    }
 
     sub columns {
         my ($table) = @_;
