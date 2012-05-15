@@ -115,7 +115,7 @@ Example
 -------
 
     # assuming accounts table with fields id(int), name(text), and bal(float)
-    package Account { use base qw(PLModel::Base) }
+    package Account { use parent qw(PLModel::Base) }
 
     my ($id, $credit);
     ... # retrieve account ID and amount to credit

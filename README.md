@@ -16,7 +16,7 @@ use v5.14;
 use warnings;
 
 package Account {
-    use base qw(PLModel::Base);
+    use parent qw(PLModel::Base);
 
     sub debit {
         my ($self) = shift;

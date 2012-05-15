@@ -264,7 +264,7 @@ package PLModel::Inflector {
             return ($string =~ s/(.*)$plur$/$1$sing/r) if $word =~ /$suffix$/;
         }
 
-        # might be a reule-based irregular word?
+        # might be a rule-based irregular word?
         my ($plur);
         foreach my $suf (@suffixes) {
             $plur = $suf->[1];
