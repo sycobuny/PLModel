@@ -3,12 +3,14 @@ use warnings;
 
 package PLModel::Base {
     use Hash::Util::FieldHash qw();
+    use Scalar::Util qw();
 
     use PLModel::Inflector;
     use PLModel::Database;
+    use PLModel::Base::Column;
     use PLModel::Accessor;
 
-    my (%class_columns, %class_tables);
+    my (%class_columns, %class_pkeys, %class_tables);
     my (%clean, %dirty);
     my ($setup_columns);
     my ($id);
@@ -37,14 +39,24 @@ package PLModel::Base {
         my ($package) = shift;
         my ($table)   = @_;
         my ($class)   = ref($package) || $package;
-        my ($columns);
+        my ($pkeys, $columns, $col_objs);
 
+        $pkeys   = {};
         $columns = PLModel::Database::columns($table);
-        $class_columns{$class} = $columns;
+        $class_pkeys{$class}   = PLModel::Database::primary_keys($table);
+        $class_columns{$class} = $col_objs = {};
 
-        foreach my $colname (keys %$columns) {
+        foreach my $pkey (@{ $class_pkeys{$class} }) { $pkeys->{$pkey} = 1 }
+        foreach my $name (keys %$columns) {
             no strict 'refs';
-            my ($method) = $class . '::' . $colname;
+            my ($method)  = $class . '::' . $name;
+            my ($conf)    = $columns->{$name};
+            my ($col_obj) = PLModel::Base::Column->new(
+                $class, $name, $conf->{TYPE_NAME}, $conf->{NULLABLE},
+                $pkeys->{$name}
+            );
+
+            $col_objs->{$name} = $col_obj;
 
             unless (*{$method}{CODE}) {
                 *{$method} = sub : lvalue {
@@ -52,9 +64,9 @@ package PLModel::Base {
                     my ($value);
                     $id = Hash::Util::FieldHash::id($self);
 
-                    $value = $dirty{$id}{$colname};
+                    $value = $dirty{$id}{$name};
 
-                    tie $value, 'PLModel::Accessor', $value, $colname, $self;
+                    tie $value, 'PLModel::Accessor', $value, $name, $self;
                     $value;
                 };
             }

@@ -68,6 +68,11 @@ package PLModel::Database {
         return $ret;
     }
 
+    sub primary_keys {
+        my ($table) = @_;
+        return [ $csub->()->primary_key(undef, undef, $table) ];
+    }
+
     sub run {
         my ($query, $parameters) = @_;
         my ($sth) = $csub->()->prepare($query);
