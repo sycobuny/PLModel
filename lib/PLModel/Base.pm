@@ -13,17 +13,16 @@ package PLModel::Base {
     my (%class_columns, %class_pkeys, %class_tables);
     my (%clean, %dirty);
     my ($setup_columns);
-    my ($id);
+    my ($id) = *Hash::Util::FieldHash::id{CODE};
 
     sub new {
         my ($package) = shift;
         my ($class)   = ref($package) || $package;
         my ($table)   = $class->table();
-        my ($clean, $dirty, $self);
+        my ($id, $clean, $dirty, $self) = $self->$id;
 
         $class->$setup_columns($table);
         $self  = bless(\(my $o), $class);
-        $id    = Hash::Util::FieldHash::id($self);
         $clean = $clean{$id} = {};
         $dirty = $dirty{$id} = {};
 
@@ -39,7 +38,7 @@ package PLModel::Base {
         my ($package) = shift;
         my ($table)   = @_;
         my ($class)   = ref($package) || $package;
-        my ($pkeys, $columns, $col_objs);
+        my ($id, $pkeys, $columns, $col_objs) = $self->$id;
 
         $pkeys   = {};
         $columns = PLModel::Database::columns($table);
